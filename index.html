@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecretComm - Komunikime Sekrete</title>
+  <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --primary-hover: #2980b9;
+      --secondary-color: #2c3e50;
+      --light-color: #f5f5f5;
+      --white: #ffffff;
+      --gray: #dddddd;
+      --dark-gray: #777777;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--light-color);
+      color: #333;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 15px 0;
+      text-align: center;
+      margin-bottom: 20px;
+      border-radius: 0 0 8px 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    h2 {
+      color: var(--secondary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 5px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      background-color: var(--white);
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      margin: 0 5px;
+      background-color: var(--white);
+      border: 1px solid var(--primary-color);
+      color: var(--primary-color);
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .tab-btn:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .tab-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+      background-color: var(--white);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid var(--gray);
+      border-radius: 4px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    button.secondary {
+      background-color: var(--dark-gray);
+    }
+
+    button.secondary:hover {
+      background-color: #555;
+    }
+
+    .tables-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .table-item {
+      padding: 8px 12px;
+      background-color: var(--light-color);
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid var(--gray);
+    }
+
+    .table-item:hover {
+      background-color: var(--gray);
+    }
+
+    .table-item.active {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    #qrcode {
+      margin: 20px auto;
+      padding: 10px;
+      border: 1px solid var(--gray);
+      display: inline-block;
+      background-color: white;
+    }
+
+    .result-container {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: var(--light-color);
+      border-radius: 8px;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--gray);
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      .nav-tabs {
+        flex-wrap: wrap;
+      }
+
+      .tab-btn {
+        margin: 5px;
+        flex-grow: 1;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <h1>SecretComm - Mjet për Komunikime Sekrete</h1>
+  </div>
+</header>
+
+<div class="container">
+  <div class="nav-tabs">
+    <button class="tab-btn active" id="qr-generator-btn">QR Generator</button>
+    <button class="tab-btn" id="kripto-gjuha-btn">KriptoGjuha</button>
+    <button class="tab-btn" id="tables-manager-btn">Menaxho Tabelat</button>
+  </div>
+
+  <!-- QR Code Generator -->
+  <div id="qr-generator" class="tab-content active">
+    <h2>Gjenero QR Code</h2>
+    <p>Shkruani tekstin që dëshironi të konvertoni në QR Code:</p>
+
+    <textarea id="qr-text" placeholder="Shkruani tekstin këtu..."></textarea>
+
+    <div>
+      <button id="generate-qr-btn">Gjenero QR Code</button>
+      <button class="secondary" id="clear-qr-btn">Pastro</button>
+    </div>
+
+    <div id="qrcode"></div>
+
+    <div class="result-container">
+      <h3>Opsione:</h3>
+      <button id="download-qr-btn">Shkarko QR Code</button>
+      <p>Ju mund të përdorni këtë QR Code për të ndarë mesazhe të enkriptuara me shokët tuaj.</p>
+    </div>
+  </div>
+
+  <!-- KriptoGjuha -->
+  <div id="kripto-gjuha" class="tab-content">
+    <div class="tab-buttons" style="margin-bottom: 15px;">
+      <button class="tab-btn" id="encrypt-btn">Enkripto</button>
+      <button class="tab-btn" id="decrypt-btn">Dekripto</button>
+    </div>
+
+    <!-- Enkriptimi -->
+    <div id="encrypt" class="crypto-tab">
+      <h2>Enkripto Mesazhin</h2>
+      <p>Zgjidh një tabelë konvertimi dhe shkruaj mesazhin:</p>
+
+      <div class="tables-container" id="encrypt-tables"></div>
+
+      <textarea id="encrypt-text" placeholder="Shkruaj mesazhin që do të enkriptosh..."></textarea>
+
+      <div>
+        <button id="do-encrypt-btn">Enkripto</button>
+        <button class="secondary" id="copy-encrypt-btn">Kopjo</button>
+      </div>
+
+      <div class="result-container">
+        <h3>Rezultati i Enkriptimit:</h3>
+        <textarea id="encrypt-result" readonly></textarea>
+      </div>
+    </div>
+
+    <!-- Dekriptimi -->
+    <div id="decrypt" class="crypto-tab" style="display: none;">
+      <h2>Dekripto Mesazhin</h2>
+      <p>Zgjidh tabelën e përdorur për enkriptim dhe shkruaj mesazhin e enkriptuar:</p>
+
+      <div class="tables-container" id="decrypt-tables"></div>
+
+      <textarea id="decrypt-text" placeholder="Shkruaj mesazhin e enkriptuar..."></textarea>
+
+      <div>
+        <button id="do-decrypt-btn">Dekripto</button>
+        <button class="secondary" id="copy-decrypt-btn">Kopjo</button>
+      </div>
+
+      <div class="result-container">
+        <h3>Rezultati i Dekriptimit:</h3>
+        <textarea id="decrypt-result" readonly></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menaxhimi i Tabelave -->
+  <div id="tables-manager" class="tab-content">
+    <h2>Menaxho Tabelat e Konvertimit</h2>
+
+    <div class="tables-container" id="all-tables"></div>
+
+    <div class="input-group">
+      <label for="new-table-name">Emri i tabelës:</label>
+      <input type="text" id="new-table-name" placeholder="Emri i tabelës">
+
+      <label for="new-table-content">Përmbajtja (formati: a=z, b=y, c=x...):</label>
+      <textarea id="new-table-content" placeholder="Shkruaj çiftet shkronjash të ndara me presje"></textarea>
+
+      <div>
+        <button id="add-table-btn">Ruaj Tabelën</button>
+        <button class="secondary" id="clear-table-btn">Pastro Formularin</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tabelat e konvertimit (të ruajtura në localStorage)
+  let tables = {};
+  let currentCryptoTable = null;
+
+  // Inicializimi
+  document.addEventListener('DOMContentLoaded', function() {
+    loadTables();
+    renderTables();
+    setupEventListeners();
+  });
+
+  function setupEventListeners() {
+    // Main tabs
+    document.getElementById('qr-generator-btn').addEventListener('click', () => openTab('qr-generator'));
+    document.getElementById('kripto-gjuha-btn').addEventListener('click', () => openTab('kripto-gjuha'));
+    document.getElementById('tables-manager-btn').addEventListener('click', () => openTab('tables-manager'));
+
+    // QR Generator buttons
+    document.getElementById('generate-qr-btn').addEventListener('click', generateQRCode);
+    document.getElementById('clear-qr-btn').addEventListener('click', clearQRCode);
+    document.getElementById('download-qr-btn').addEventListener('click', downloadQRCode);
+
+    // Crypto tabs
+    document.getElementById('encrypt-btn').addEventListener('click', () => openCryptoTab('encrypt'));
+    document.getElementById('decrypt-btn').addEventListener('click', () => openCryptoTab('decrypt'));
+
+    // Crypto buttons
+    document.getElementById('do-encrypt-btn').addEventListener('click', encryptText);
+    document.getElementById('copy-encrypt-btn').addEventListener('click', () => copyResult('encrypt-result'));
+    document.getElementById('do-decrypt-btn').addEventListener('click', decryptText);
+    document.getElementById('copy-decrypt-btn').addEventListener('click', () => copyResult('decrypt-result'));
+
+    // Table management buttons
+    document.getElementById('add-table-btn').addEventListener('click', addNewTable);
+    document.getElementById('clear-table-btn').addEventListener('click', clearTableForm);
+  }
+
+  // Ngarkimi i tabelave nga localStorage
+  function loadTables() {
+    const savedTables = localStorage.getItem('secretCommTables');
+    if (savedTables) {
+      tables = JSON.parse(savedTables);
+    } else {
+      // Tabela default nëse nuk ka të ruajtura
+      tables = {
+        "Tabela1": {"a":"z","b":"y","c":"x","d":"w","e":"v","f":"u","g":"t","h":"s","i":"r","j":"q","k":"p","l":"o","m":"n","n":"m","o":"l","p":"k","q":"j","r":"i","s":"h","t":"g","u":"f","v":"e","w":"d","x":"c","y":"b","z":"a"},
+        "Tabela2": {"a":"m","b":"n","c":"b","d":"v","e":"c","f":"x","g":"z","h":"l","i":"k","j":"j","k":"h","l":"g","m":"f","n":"d","o":"s","p":"a","q":"q","r":"w","s":"e","t":"r","u":"t","v":"y","w":"u","x":"i","y":"o","z":"p"},
+        "Tabela3": {"a":"α","b":"β","c":"γ","d":"δ","e":"ε","f":"ζ","g":"η","h":"θ","i":"ι","j":"κ","k":"λ","l":"μ","m":"ν","n":"ξ","o":"ο","p":"π","q":"ρ","r":"σ","s":"τ","t":"υ","u":"φ","v":"χ","w":"ψ","x":"ω","y":"ς","z":"Δ"}
+      };
+      saveTables();
+    }
+  }
+
+  // Ruajtja e tabelave në localStorage
+  function saveTables() {
+    localStorage.setItem('secretCommTables', JSON.stringify(tables));
+  }
+
+  // Renderimi i tabelave
+  function renderTables() {
+    renderTableList('encrypt-tables');
+    renderTableList('decrypt-tables');
+    renderTableList('all-tables');
+  }
+
+  function renderTableList(elementId) {
+    const container = document.getElementById(elementId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    for (const tableName in tables) {
+      const tableItem = document.createElement('div');
+      tableItem.className = 'table-item';
+      tableItem.textContent = tableName;
+      tableItem.addEventListener('click', function() {
+        // Hiq aktivin nga të gjithë
+        const items = container.getElementsByClassName('table-item');
+        for (let item of items) {
+          item.classList.remove('active');
+        }
+        // Shto aktiv tek ky
+        this.classList.add('active');
+
+        currentCryptoTable = tableName;
+      });
+
+      container.appendChild(tableItem);
+    }
+  }
+
+  // Funksioni për enkriptim
+  function encryptText() {
+    if (!currentCryptoTable) {
+      alert('Zgjidh një tabelë konvertimi!');
+      return;
+    }
+
+    const text = document.getElementById('encrypt-text').value.toLowerCase();
+    if (!text) {
+      alert('Shkruaj një mesazh për të enkriptuar!');
+      return;
+    }
+
+    const table = tables[currentCryptoTable];
+    let result = '';
+
+    for (let char of text) {
+      if (table[char]) {
+        result += table[char];
+      } else {
+        result += char; // Lë karakteret pa ndryshim nëse nuk janë në tabelë
+      }
+    }
+
+    document.getElementById('encrypt-result').value = result;
+  }
+
+  // Funksioni për dekriptim
+  function decryptText() {
+    if (!currentCryptoTable) {
+      alert('Zgjidh një tabelë konvertimi!');
+      return;
+    }
+
+    const text = document.getElementById('decrypt-text').value.toLowerCase();
+    if (!text) {
+      alert('Shkruaj një mesazh për të dekriptuar!');
+      return;
+    }
+
+    const table = tables[currentCryptoTable];
+    // Krijon një tabelë të kundërt për dekriptim
+    const reverseTable = {};
+    for (const key in table) {
+      reverseTable[table[key]] = key;
+    }
+
+    let result = '';
+
+    for (let char of text) {
+      if (reverseTable[char]) {
+        result += reverseTable[char];
+      } else {
+        result += char; // Lë karakteret pa ndryshim nëse nuk janë në tabelë
+      }
+    }
+
+    document.getElementById('decrypt-result').value = result;
+  }
+
+  // Shtimi i tabelës së re
+  function addNewTable() {
+    const name = document.getElementById('new-table-name').value.trim();
+    const content = document.getElementById('new-table-content').value.trim();
+
+    if (!name) {
+      alert('Shkruaj një emër për tabelën!');
+      return;
+    }
+
+    if (tables[name]) {
+      if (!confirm('Ekziston një tabelë me këtë emër! Dëshiron ta përditësosh?')) {
+        return;
+      }
+    }
+
+    if (!content) {
+      alert('Shkruaj përmbajtjen e tabelës!');
+      return;
+    }
+
+    // Krijon objektin e tabelës nga stringu i dhënë
+    try {
+      const tableObj = {};
+      const pairs = content.split(',');
+
+      for (let pair of pairs) {
+        const [key, value] = pair.split('=').map(item => item.trim());
+        if (key && value) {
+          tableObj[key.toLowerCase()] = value.toLowerCase();
+        }
+      }
+
+      if (Object.keys(tableObj).length === 0) {
+        throw new Error('Format i gabuar');
+      }
+
+      tables[name] = tableObj;
+      saveTables();
+      renderTables();
+
+      document.getElementById('new-table-name').value = '';
+      document.getElementById('new-table-content').value = '';
+
+      alert(`Tabela "${name}" u ruajt me sukses!`);
+    } catch (e) {
+      alert('Gabim në format. Përdor formatin: a=z, b=y, c=x...');
+    }
+  }
+
+  // Pastrimi i formularit për tabela të reja
+  function clearTableForm() {
+    document.getElementById('new-table-name').value = '';
+    document.getElementById('new-table-content').value = '';
+  }
+
+  // Kopjimi i rezultatit
+  function copyResult(elementId) {
+    const resultText = document.getElementById(elementId);
+    resultText.select();
+    document.execCommand('copy');
+    alert('U kopjua në clipboard!');
+  }
+
+  // Ndryshimi i tab-ave kryesore
+  function openTab(tabId) {
+    const tabs = document.getElementsByClassName('tab-content');
+    for (let tab of tabs) {
+      tab.classList.remove('active');
+    }
+    document.getElementById(tabId).classList.add('active');
+
+    const buttons = document.getElementsByClassName('tab-btn');
+    for (let btn of buttons) {
+      btn.classList.remove('active');
+    }
+    event.currentTarget.classList.add('active');
+
+    // Nëse po hapet KriptoGjuha, shfaq enkriptimin si default
+    if (tabId === 'kripto-gjuha') {
+      openCryptoTab('encrypt');
+    }
+  }
+
+  // Ndryshimi i tab-ave brenda KriptoGjuhes
+  function openCryptoTab(tabId) {
+    const tabs = document.querySelectorAll('.crypto-tab');
+    for (let tab of tabs) {
+      tab.style.display = 'none';
+    }
+    document.getElementById(tabId).style.display = 'block';
+
+    // Reset current table selection when switching tabs
+    currentCryptoTable = null;
+  }
+
+  // Gjenerimi i QR Code
+  function generateQRCode() {
+    const text = document.getElementById('qr-text').value;
+
+    if (!text) {
+      alert('Ju lutem shkruani një tekst për të krijuar QR Code!');
+      return;
+    }
+
+    document.getElementById('qrcode').innerHTML = '';
+
+    new QRCode(document.getElementById('qrcode'), {
+      text: text,
+      width: 200,
+      height: 200,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+
+  // Pastrimi i QR Code
+  function clearQRCode() {
+    document.getElementById('qr-text').value = '';
+    document.getElementById('qrcode').innerHTML = '';
+  }
+
+  // Shkarkimi i QR Code
+  function downloadQRCode() {
+    const qrcode = document.getElementById('qrcode');
+    if (!qrcode || qrcode.innerHTML === '') {
+      alert('Ska asnjë QR Code për të shkarkuar!');
+      return;
+    }
+
+    const canvas = qrcode.getElementsByTagName('canvas')[0];
+    if (!canvas) {
+      alert('Gabim në gjenerimin e QR Code!');
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.download = 'qr-code.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+</script>
+</body>
+</html>
